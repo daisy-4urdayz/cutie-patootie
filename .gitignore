@@ -24,3 +24,6 @@ release/
 .vscode/
 .DS_Store
 Thumbs.db
+
+# --- 파일 ---
+README-forMe.md

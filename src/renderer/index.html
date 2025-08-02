@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="author" content="daisy">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+    <div class="mainPage">
+        <div class="overlay"></div>
+        <img id="mainImage" class="dragArea" src="" alt="Default image">
+    </div>
+
+    <script>
+        console.log("[HTML] 이미지 로딩 완료");
+        const imageName = "default.png";
+        const imagePath = `asset/${imageName}`;
+        document.getElementById("mainImage").src = imagePath;
+    </script>
+</body>
+</html>
