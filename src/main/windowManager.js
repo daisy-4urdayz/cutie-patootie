@@ -1,10 +1,10 @@
-// src/main/windowManager.js
-
-const { BrowserWindow, screen } = require('electron'); // Electron 모듈 필요
+const { BrowserWindow, screen } = require('electron');
 
 // 창 크기를 모니터에 맞춰 제한하고 조절하는 함수
-function resizeWindowToFitScreen(browserWindow, desiredWidth, desiredHeight) {
-    if (!browserWindow || browserWindow.isDestroyed()) {
+function resizeWindowToFitScreen(browserWindow, desiredWidth, desiredHeight)
+{
+    if (!browserWindow || browserWindow.isDestroyed())
+    {
         console.warn("[WindowManager] 유효하지 않은 BrowserWindow 객체입니다.");
         return;
     }
@@ -23,9 +23,12 @@ function resizeWindowToFitScreen(browserWindow, desiredWidth, desiredHeight) {
     const imageAspectRatio = desiredWidth / desiredHeight;
     const screenAspectRatio = screenWidth / screenHeight;
 
-    if (newWidth === screenWidth && imageAspectRatio > screenAspectRatio) {
+    if (newWidth === screenWidth && imageAspectRatio > screenAspectRatio)
+    {
         newHeight = Math.round(screenWidth / imageAspectRatio);
-    } else if (newHeight === screenHeight && imageAspectRatio < screenAspectRatio) {
+    }
+    else if (newHeight === screenHeight && imageAspectRatio < screenAspectRatio)
+    {
         newWidth = Math.round(screenHeight * imageAspectRatio);
     }
 
@@ -33,12 +36,14 @@ function resizeWindowToFitScreen(browserWindow, desiredWidth, desiredHeight) {
     const [x, y] = browserWindow.getPosition();
 
     // 기존 크기와 다를 때만 조절 (불필요한 조작 방지)
-    if (currentContentWidth !== newWidth || currentContentHeight !== newHeight) {
+    if (currentContentWidth !== newWidth || currentContentHeight !== newHeight)
+    {
         console.log(`[WindowManager] 창 크기 조절: ${newWidth}x${newHeight} (요청: ${desiredWidth}x${desiredHeight}, 화면 제한: ${screenWidth}x${screenHeight})`);
         browserWindow.setBounds({ x, y, width: newWidth, height: newHeight });
     }
 }
 
-module.exports = {
+module.exports =
+{
     resizeWindowToFitScreen
 };

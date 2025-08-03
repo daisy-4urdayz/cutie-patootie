@@ -29,12 +29,12 @@ function getTempPath() { return path.join(rootDir, "temp"); }
 
 module.exports =
 {
-  getAssetPath,
-  getMainPath,
-  getModulePath,
-  getRenderPath,
-  getSharedPath,
-  getImagePath,
-  getConfigPath,
-  getTempPath,
+    getAssetPath,
+    getMainPath,
+    getModulePath,
+    getRenderPath,
+    getSharedPath,
+    getImagePath,
+    getConfigPath,
+    getTempPath,
 };

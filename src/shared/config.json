@@ -1,8 +1,9 @@
 {
-  "window": {
-    "mode": "image",
-    "image": "default.png",
-    "width": 951,
-    "height": 390
-  }
+    "window":
+    {
+        "mode": "image",
+        "image": "default.png",
+        "width": 951,
+        "height": 390
+    }
 }
