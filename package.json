@@ -1,23 +1,63 @@
 {
     "name": "cutie-patootie",
     "version": "1.0.0",
-    "description": "",
+    "description": "Desktop widget for my cutie patooties",
     "license": "ISC",
-    "author": "",
+    "author": "daisy",
     "type": "commonjs",
     "main": "src/main/main.js",
-    "scripts":
-    {
+    "scripts": {
         "test": "echo \"Error: no test specified\" && exit 1",
-        "start": "electron ."
+        "start": "electron .",
+        "build": "electron-builder",
+        "build:win": "electron-builder --win",
+        "dist": "electron-builder --dir",
+        "clean": "rimraf dist node_modules/.cache"
     },
-    "devDependencies":
-    {
-        "electron": "^37.2.5"
+    "devDependencies": {
+        "electron": "^37.2.5",
+        "electron-builder": "^26.0.12"
     },
-    "dependencies":
-    {
+    "dependencies": {
+        "@emnapi/runtime": "^1.4.5",
         "image-size": "^2.0.2",
         "sharp": "^0.34.3"
+    },
+    "optionalDependencies": {
+        "@img/sharp-win32-x64": "^0.34.3"
+    },
+    "build": {
+        "appId": "com.daisy-4urdayz.cutie-patootie",
+        "productName": "My cutie patooties",
+        "copyright": "Copyright 2025. daisy.",
+        "directories": {
+            "output": "dist",
+            "buildResources": "build"
+        },
+        "files": [
+            "src/**/*",
+            "package.json",
+            "!node_modules/@img/sharp-darwin*/**",
+            "!node_modules/@img/sharp-linux*/**"
+        ],
+        "asar": false,
+        "win": {
+            "target": {
+                "target": "nsis",
+                "arch": ["x64"]
+            },
+            "icon": "src/icon.ico",
+            "artifactName": "${productName} Setup-${version}.${ext}",
+            "requestedExecutionLevel": "asInvoker"
+        },
+        "nsis": {
+            "oneClick": false,
+            "allowToChangeInstallationDirectory": true,
+            "createDesktopShortcut": true,
+            "createStartMenuShortcut": true
+        },
+        "extraMetadata": {
+            "main": "src/main/main.js"
+        }
     }
 }
