@@ -1,7 +1,9 @@
-// src/modules/imageManager.js
+// src/module/imageManager.js
+
 const fs = require('fs');
 const path = require('path');
 const pathJoin = require('../shared/pathJoin');
+const { ipcRenderer } = require('electron');
 
 const IMAGE_DIR = pathJoin.getAssetPath();
 
@@ -9,10 +11,12 @@ let currentImageIndex = -1;
 let imageFiles = [];
 let changeInterval = null;
 
-// 새 변수: 현재 활성화된 이미지 요소 (current-image 또는 next-image)
 let activeImageElement = null;
-// 새 변수: 비활성화된 이미지 요소 (activeImageElement의 반대)
 let inactiveImageElement = null;
+
+// ⭐ 추가: 고정된 창 크기 변수 ⭐
+let fixedWindowWidth = 0;
+let fixedWindowHeight = 0;
 
 function loadImages() {
     try {
@@ -21,7 +25,7 @@ function loadImages() {
         if (imageFiles.length === 0) {
             console.warn(`[ImageManager] ${IMAGE_DIR} 폴더에 이미지가 없습니다.`);
         } else {
-            console.log('[ImageManager] 이미지 로드 완료:', imageFiles);
+            console.log('[ImageManager] 이미지 로드 완료:', imageFiles.length + '개');
         }
     } catch (error) {
         console.error('[ImageManager] 이미지 폴더를 읽는 중 오류 발생:', error);
@@ -49,112 +53,135 @@ function getNextImage(isRandom = true) {
     return path.join(IMAGE_DIR, imageName);
 }
 
-// ⭐ 새로 추가되는 함수: 이미지 전환 로직 ⭐
-function transitionImage(newImagePath, callback) {
+function transitionImage(newImagePath) {
     if (!activeImageElement || !inactiveImageElement) {
         console.error("[ImageManager] 이미지 요소가 초기화되지 않았습니다.");
         return;
     }
 
-    // 새 이미지를 비활성화된 요소에 로드
+    // 1. 새 이미지를 비활성화된 요소(inactiveImageElement)에 로드
+    //    이 시점에서 inactiveImageElement는 opacity: 0 상태여야 합니다.
     inactiveImageElement.src = newImagePath;
 
-    // 이미지가 로드될 때까지 기다림
     inactiveImageElement.onload = () => {
         console.log('[ImageManager] 새 이미지 로드 완료:', newImagePath);
 
-        // 새 이미지를 활성화 (보이게 함)
-        inactiveImageElement.classList.add('active');
-        // 이전 이미지를 비활성화 (숨김)
-        activeImageElement.classList.remove('active');
+        // 2. 클래스 토글 전에, 불필요한 클래스가 붙어있을 경우를 대비하여 초기화
+        activeImageElement.classList.remove('bgImageActive');
+        activeImageElement.classList.add('bgImage'); // 현재 활성화된 이미지를 비활성 상태로 만듦 (opacity: 0)
 
-        // active/inactive 요소 교체
-        [activeImageElement, inactiveImageElement] = [inactiveImageElement, activeImageElement];
+        // ⭐ 중요: 강제 리페인트/리플로우 유발 (브라우저가 DOM 변경을 즉시 적용하도록 유도) ⭐
+        // 이 라인은 DOM을 변경하고, 브라우저가 이 변경을 즉시 계산하도록 만듭니다.
+        // 다음 라인(inactiveImageElement.classList.add)이 실행되기 전에
+        // activeImageElement의 opacity 변화가 적용될 시간을 줍니다.
+        void activeImageElement.offsetWidth; 
 
-        // 이미지 로드 및 전환 완료 후 콜백 실행 (창 크기 조절 등)
-        if (typeof callback === 'function') {
-            callback(activeImageElement);
-        }
+        inactiveImageElement.classList.remove('bgImage'); // 혹시 모를 상황 대비 (bgImage 제거)
+        inactiveImageElement.classList.add('bgImageActive'); // 새로 로드된 이미지를 활성 상태로 만듦 (opacity: 1)
+        
+        // ⭐ transitionend 이벤트 핸들러 등록 시점 확인 ⭐
+        // inactiveImageElement가 'bgImageActive' 클래스를 얻으면서 transition이 시작됩니다.
+        // 이 시점에 이벤트를 등록하는 것이 올바릅니다.
+        // { once: true } 옵션으로 한번만 실행되도록 보장합니다.
+        inactiveImageElement.addEventListener('transitionend', function handler(e) {
+            // 이벤트가 정확히 opacity 속성에서 발생했는지 확인 (선택 사항이지만 안전함)
+            if (e.propertyName === 'opacity') {
+                console.log('[ImageManager] 이미지 페이드 전환 완료.');
+                inactiveImageElement.removeEventListener('transitionend', handler); // 한 번 실행 후 제거
+
+                // active/inactive 요소 교체
+                // 이 시점에서 inactiveImageElement는 이미 opacity:1 상태가 되었으므로 activeImageElement가 되어야 합니다.
+                // 이전 activeImageElement는 이제 inactiveImageElement가 되어 다음 로드에 사용됩니다.
+                [activeImageElement, inactiveImageElement] = [inactiveImageElement, activeImageElement];
+
+                // 창 크기 조절 요청 스킵 (고정된 창 크기 사용)
+                console.log(`[ImageManager] 창 크기 조절 요청 스킵. 고정된 창 크기: ${fixedWindowWidth}x${fixedWindowHeight}`);
+            }
+        }, { once: true });
     };
 
     inactiveImageElement.onerror = () => {
         console.error('[ImageManager] 새 이미지 로드 실패:', newImagePath);
-        // 오류 처리: 콜백은 호출하지 않거나, 오류 콜백을 별도로 전달할 수 있습니다.
+        // 오류 발생 시에도 타이머는 계속 진행되도록 처리하거나, 기본 이미지 로직 추가
     };
 }
 
+// ⭐ startAutoImageChange 함수에 고정된 창 크기 인자 추가 ⭐
+function startAutoImageChange(currentImgEl, nextImgEl, initialWindowWidth, initialWindowHeight, minIntervalMs = 5000, maxIntervalMs = 15000) {
+    activeImageElement = currentImgEl;
+    inactiveImageElement = nextImgEl;
 
-// ⭐ startAutoImageChange 함수 시그니처 변경 및 로직 수정 ⭐
-// 이제 두 개의 이미지 요소를 받습니다.
-function startAutoImageChange(currentImgEl, nextImgEl, minIntervalMs = 5000, maxIntervalMs = 15000) {
-    activeImageElement = currentImgEl; // 처음엔 current-image가 active
-    inactiveImageElement = nextImgEl;  // next-image는 inactive
+    // ⭐ 고정된 창 크기 설정 ⭐
+    fixedWindowWidth = initialWindowWidth;
+    fixedWindowHeight = initialWindowHeight;
 
-    // 초기 이미지 설정 (첫 번째 이미지를 currentImgEl에 설정하고 active 클래스 추가)
+    // 첫 이미지 로드 시 창 크기 조절은 여전히 필요할 수 있음
+    // (앱 시작 시 최초 1회만 고정된 크기로 맞춤)
     const initialImagePath = getNextImage(true);
     if (initialImagePath) {
         activeImageElement.src = initialImagePath;
-        activeImageElement.classList.add('active'); // 첫 이미지 활성화
+        activeImageElement.classList.add('bgImageActive');
+
+        activeImageElement.onload = () => {
+            console.log('[ImageManager] 초기 이미지 로드 완료:', initialImagePath);
+            // ⭐ 변경: 첫 이미지 로드 시 고정된 창 크기로 IPC 호출 ⭐
+            if (fixedWindowWidth && fixedWindowHeight) {
+                console.log(`[ImageManager] 초기 창 크기 설정 요청: ${fixedWindowWidth}x${fixedWindowHeight}`);
+                ipcRenderer.send("resize-window", { width: fixedWindowWidth, height: fixedWindowHeight });
+            } else {
+                // 만약 고정 크기가 제대로 전달되지 않았다면, 이미지 크기에 맞춤 (백업)
+                if (activeImageElement.naturalWidth && activeImageElement.naturalHeight) {
+                    console.warn("[ImageManager] 고정 창 크기 정보 없음. 초기 이미지 크기에 맞춰 조절:", activeImageElement.naturalWidth, activeImageElement.naturalHeight);
+                    ipcRenderer.send("resize-window", { width: activeImageElement.naturalWidth, height: activeImageElement.naturalHeight });
+                }
+            }
+            ipcRenderer.send('refresh-window-state');
+
+            // 자동 변경 타이머 시작
+            if (changeInterval) {
+                clearTimeout(changeInterval);
+            }
+            const initialDelay = Math.floor(Math.random() * (maxIntervalMs - minIntervalMs + 1)) + minIntervalMs;
+            changeInterval = setTimeout(changeImage, initialDelay);
+            console.log(`[ImageManager] 첫 자동 변경은 ${initialDelay}ms 후에 시작됩니다.`);
+        };
+        activeImageElement.onerror = () => {
+            console.error('[ImageManager] 초기 이미지 로드 실패:', initialImagePath);
+            if (changeInterval) {
+                clearTimeout(changeInterval);
+            }
+            const initialDelay = Math.floor(Math.random() * (maxIntervalMs - minIntervalMs + 1)) + minIntervalMs;
+            changeInterval = setTimeout(changeImage, initialDelay);
+        };
     } else {
-        console.warn("[ImageManager] 표시할 초기 이미지가 없습니다.");
+        console.warn("[ImageManager] 표시할 초기 이미지가 없습니다. 자동 변경 시작 불가.");
         return;
-    }
-
-
-    if (changeInterval) {
-        clearTimeout(changeInterval);
     }
 
     const changeImage = () => {
         const imagePath = getNextImage(true);
         if (imagePath) {
             console.log('[ImageManager] 다음 이미지 자동 변경 준비:', imagePath);
-            // transitionImage 함수를 호출하여 이미지 전환과 콜백을 처리합니다.
-            transitionImage(imagePath, (loadedImgEl) => {
-                // 이미지가 완전히 로드되고 전환된 후 호출될 콜백
-                // renderer.js에서 받았던 onload 로직을 여기서 대신 호출
-                if (loadedImgEl.naturalWidth && loadedImgEl.naturalHeight) {
-                    console.log(`[Renderer] 이미지 로드 완료 및 크기: ${loadedImgEl.naturalWidth}x${loadedImgEl.naturalHeight}`);
-                    ipcRenderer.send("resize-window", { width: loadedImgEl.naturalWidth, height: loadedImgEl.naturalHeight });
-
-                    setTimeout(() => {
-                        ipcRenderer.send('refresh-window-state');
-                        console.log("[Renderer] 메인 프로세스에 창 상태 갱신 요청을 보냈습니다.");
-                    }, 100);
-                }
-            });
+            transitionImage(imagePath);
         }
         const nextInterval = Math.floor(Math.random() * (maxIntervalMs - minIntervalMs + 1)) + minIntervalMs;
         changeInterval = setTimeout(changeImage, nextInterval);
+        console.log(`[ImageManager] 다음 자동 변경은 ${nextInterval}ms 후에 시작됩니다.`);
     };
-
-    // 초기 이미지 설정 후 바로 첫 타이머 시작 (지연 시작)
-    const initialDelay = Math.floor(Math.random() * (maxIntervalMs - minIntervalMs + 1)) + minIntervalMs;
-    changeInterval = setTimeout(changeImage, initialDelay);
 }
 
-// ⭐ changeImageManually 함수 시그니처 변경 및 로직 수정 ⭐
-// 이제 activeImageElement를 사용합니다.
+
 function changeImageManually() {
     const imagePath = getNextImage(false);
     if (imagePath) {
         console.log('[ImageManager] 다음 이미지 수동 변경 준비:', imagePath);
-        transitionImage(imagePath, (loadedImgEl) => {
-            // 수동 변경 시에도 창 크기 조절 로직 호출
-            if (loadedImgEl.naturalWidth && loadedImgEl.naturalHeight) {
-                console.log(`[Renderer] 이미지 로드 완료 및 크기: ${loadedImgEl.naturalWidth}x${loadedImgEl.naturalHeight}`);
-                ipcRenderer.send("resize-window", { width: loadedImgEl.naturalWidth, height: loadedImgEl.naturalHeight });
-
-                setTimeout(() => {
-                    ipcRenderer.send('refresh-window-state');
-                    console.log("[Renderer] 메인 프로세스에 창 상태 갱신 요청을 보냈습니다.");
-                }, 100);
-            }
-        });
+        transitionImage(imagePath);
     }
 }
 
 function getInitialImagePath() {
+    // 이 함수는 windowConfig.js에서 호출되어 초기 이미지 크기를 가져올 때만 사용됩니다.
+    // imageManager 내부 로직에서는 직접 사용되지 않습니다.
     if (imageFiles.length === 0) {
         loadImages();
     }
@@ -164,10 +191,10 @@ function getInitialImagePath() {
     return null;
 }
 
-loadImages();
+loadImages(); // 초기 이미지 파일 목록 로드
 
 module.exports = {
     startAutoImageChange,
     changeImageManually,
-    getInitialImagePath
+    getInitialImagePath // windowConfig.js에서 필요하므로 계속 내보냅니다.
 };

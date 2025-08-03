@@ -1,36 +1,49 @@
-html, body
-{
+/* src/renderer/style.css */
+
+html, body {
     margin: 0;
     padding: 0;
     width: 100%;
     height: 100%;
-    background-color: transparent !important;
-    background: transparent;
+    overflow: hidden;
+    background-color: transparent;
 }
 
-.mainPage
-{
-    width: 100%;
-    height: 100%;
+body {
     display: flex;
     justify-content: center;
     align-items: center;
 }
 
-#mainImage
-{
-    max-width: 100%;
-    max-height: 100%;
-    object-fit: contain;
+#mainPage {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    -webkit-app-region: drag;
 }
 
-/* drag 가능한 영역(이미지 자체) */
-.dragArea
-{
-    -webkit-app-region: drag;
-    width: 100%;
-    height: auto;
+/* ⭐ 변경: ID 선택자를 사용하여 우선순위 극대화 ⭐ */
+#currentImage, #nextImage { /* 두 이미지 ID 모두에 적용 */
     position: absolute;
     top: 0;
     left: 0;
+    width: 100%;         /* 이제 !important 없이도 강력한 우선순위를 가집니다. */
+    height: 100%;
+    object-fit: contain; /* 이미지가 잘리지 않고 비율 유지 */
+    display: block;      /* 블록 요소로 명확히 설정 */
+    transition: opacity 1s ease-in-out;
+    pointer-events: none;
+    /* -webkit-app-region: no-drag;는 imageManager.js에서 설정하는 것이 좋습니다. */
+}
+
+/* 클래스는 투명도 전환에만 사용 */
+.bgImageActive {
+    opacity: 1;
+}
+
+.bgImage {
+    opacity: 0;
 }
