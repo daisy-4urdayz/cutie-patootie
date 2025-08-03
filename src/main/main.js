@@ -1,81 +1,76 @@
-const
-{
-	app,
-	BrowserWindow
-} = require("electron");
+const { app, BrowserWindow, ipcMain } = require("electron");
 const pathJoin = require("../shared/pathJoin.js");
-const
-{
-	getWindowConfig
-} = require("./windowConfig.js");
+const { getWindowConfig } = require("./windowConfig.js");
+app.disableHardwareAcceleration(); // Title bar 삭제를 위한 하드웨어 가속 해제(CPU에서 처리함)
 
-// Title 설정: 공백
+// Title 공백화
 let mainWindow;
 let currentTitle = "";
 
-// 비동기 함수로 변경
+// 비동기 작업 선언(async)
 async function createMainWindow()
 {
-	try
+    try
 	{
-		const
-		{
-			width,
-			height
-		} = await getWindowConfig(); // await 사용
+		// getWindowConfig()가 설정값을 완전히 가져올 때까지 mainWindow 정지(await)
+        const { width, height } = await getWindowConfig();
 
-		mainWindow = new BrowserWindow(
-		{
-			title: currentTitle,
-			titleBarStyle: "hidden",
-			width,
-			height,
-			alwaysOnTop: true,
-			frame: false,
-			transparent: true,
-			hasShadow: false,
-			webPreferences:
+        mainWindow = new BrowserWindow
+		({
+            title: currentTitle,
+            titleBarStyle: "hiddenInset",
+            width,
+            height,
+            alwaysOnTop: true,
+            frame: false,
+            transparent: true,
+            hasShadow: false,
+            webPreferences:
 			{
-				nodeIntegration: true,
-				contextIsolation: false
-			}
-		});
+                nodeIntegration: true,
+                contextIsolation: false
+            }
+        });
 
-		// HTML 로드 여부 확인
-		await mainWindow.loadFile(pathJoin.getRenderPath() + "/index.html");
-		console.log("[HTML] HTML 파일 로딩 완료");
+        await mainWindow.loadFile(pathJoin.getRenderPath() + "/index.html");
+        console.log("[HTML] HTML 파일 로딩 완료");
 
-		// 페이지 로드 완료 확인
-		mainWindow.webContents.on("did-finish-load", () =>
+        // renderer.js에서 요청 시 창 상태 갱신
+		// 윈도우 창의 고질적인 버그 해결을 위한 화면 리로딩
+        ipcMain.on('refresh-window-state', () =>
 		{
-			console.log("[Event] did-finish-load 이벤트 발생");
-		});
-	}
+			if (mainWindow && !mainWindow.isDestroyed())
+			{
+				mainWindow.hide();
+				mainWindow.show();
+				console.log("[renderer.js] IPC 요청으로 창 상태 갱신 시도: hide/show()");
+			}
+        });
+
+    }
+	
 	catch (err)
 	{
-		console.error("[Window] 창 생성 실패:", err);
-	}
+        console.error("[Window] 창 생성 실패:", err);
+    }
 }
 
-// 앱이 준비되었다면
 console.log("[APP] 앱 시작 시점");
 
 app.whenReady().then(() =>
 {
-	console.log("[APP] 앱 준비 완료: Electron 초기화 완료");
-	createMainWindow();
+    console.log("[APP] 앱 준비 완료: Electron 초기화 완료");
+    createMainWindow();
 
-	// macOS 전용: Dock에서 아이콘을 클릭했다면 발생하는 이벤트
-	app.on("activate", () =>
+    app.on("activate", () =>
 	{
-		console.log("[APP] macOS activate 이벤트 발생(Dock 아이콘 클릭됨)");
-		if (BrowserWindow.getAllWindows().length === 0) createMainWindow();
-	});
+        console.log("[APP] macOS activate 이벤트 발생(Dock 아이콘 클릭됨)");
+        if (BrowserWindow.getAllWindows().length === 0) createMainWindow();
+    });
 });
 
-// Windows & Linux 전용: 모든 창이 닫히면 앱을 종료함
 app.on("window-all-closed", () =>
 {
-	console.log("[APP] 모든 창이 닫힘");
-	if (process.platform !== "darwin") app.quit();
+    console.log("[APP] 모든 창이 닫힘");
+    if (process.platform !== "darwin") app.quit();
 });
