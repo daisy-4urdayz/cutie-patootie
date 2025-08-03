@@ -24,7 +24,7 @@ html, body
     object-fit: contain;
 }
 
-/* drag 가능한 영역 */
+/* drag 가능한 영역(이미지 자체) */
 .dragArea
 {
     -webkit-app-region: drag;
@@ -33,16 +33,4 @@ html, body
     position: absolute;
     top: 0;
     left: 0;
-}
-
-.overlay
-{
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: auto; /* 화면 상단 흰색 영역 높이에 맞게 조절 */
-    background-color: transparent;
-    pointer-events: none;
-    z-index: 9999;
 }
