@@ -28,4 +28,4 @@ Thumbs.db
 # --- 파일 ---
 README-forMe.md
 token.txt
-../renderer/asset/
+/src/renderer/asset/
