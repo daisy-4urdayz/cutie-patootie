@@ -28,5 +28,7 @@ Thumbs.db
 # --- 파일 ---
 README-forMe.md
 token.txt
-/src/renderer/asset/
-emsdk/
+asset/*
+!asset/.gitkeep
+emsdk/src/renderer/asset/* 
+!src/renderer/asset/.gitkeep 

@@ -6,7 +6,8 @@
     "author": "daisy",
     "type": "commonjs",
     "main": "src/main/main.js",
-    "scripts": {
+    "scripts":
+    {
         "test": "echo \"Error: no test specified\" && exit 1",
         "start": "electron .",
         "build": "electron-builder",
@@ -14,49 +15,60 @@
         "dist": "electron-builder --dir",
         "clean": "rimraf dist node_modules/.cache"
     },
-    "devDependencies": {
+    "devDependencies":
+    {
         "electron": "^37.2.5",
         "electron-builder": "^26.0.12"
     },
-    "dependencies": {
+    "dependencies":
+    {
         "@emnapi/runtime": "^1.4.5",
         "image-size": "^2.0.2",
         "sharp": "^0.34.3"
     },
-    "optionalDependencies": {
+    "optionalDependencies":
+    {
         "@img/sharp-win32-x64": "^0.34.3"
     },
-    "build": {
+    "build":
+    {
         "appId": "com.daisy-4urdayz.cutie-patootie",
         "productName": "My cutie patooties",
         "copyright": "Copyright 2025. daisy.",
-        "directories": {
+        "directories":
+        {
             "output": "dist",
             "buildResources": "build"
         },
         "files": [
             "src/**/*",
             "package.json",
-            "!node_modules/@img/sharp-darwin*/**",
-            "!node_modules/@img/sharp-linux*/**"
+            "node_modules/sharp/**/*",
+            "node_modules/@img/sharp-win32-x64/**/*",
+            "node_modules/@emnapi/**/*",
+            "node_modules/image-size/**/*",
+            "!node_modules/@img/sharp-darwin*",
+            "!node_modules/@img/sharp-linux*"
         ],
         "asar": false,
-        "win": {
-            "target": {
-                "target": "nsis",
+        "win":
+        {
+            "target":
+            {
+                "target": "dir",
                 "arch": ["x64"]
             },
-            "icon": "src/icon.ico",
-            "artifactName": "${productName} Setup-${version}.${ext}",
-            "requestedExecutionLevel": "asInvoker"
+            "icon": "src/icon.ico"
         },
-        "nsis": {
+        "nsis":
+        {
             "oneClick": false,
             "allowToChangeInstallationDirectory": true,
             "createDesktopShortcut": true,
             "createStartMenuShortcut": true
         },
-        "extraMetadata": {
+        "extraMetadata":
+        {
             "main": "src/main/main.js"
         }
     }
