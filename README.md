@@ -21,7 +21,7 @@
 ---
 
 ## 📂 폴더 구조
-
+```
 dist/win-unpacked/
 ├─ My cutie patooties.exe ← 프로그램 실행 파일
 ├─ ...
@@ -34,7 +34,7 @@ dist/win-unpacked/
    │  │  │  └─ asset/   ← 이미지를 넣는 폴더
    │  │  └─ shared/     ← config.json(앱 설정 파일)의 위치
    └─ └─ package.json
-
+```
 - 프로그램 실행은 최상위의 **`My cutie patooties.exe`**를 실행하세요.
 - 소스 코드는 **`resources/app`** 폴더에 있습니다.
 - 적어 두지 않은 건 딱히 신경쓰실 필요 없는 것들입니다. 만들어 놓고 안 쓴 파일도 있긴 합니다.
