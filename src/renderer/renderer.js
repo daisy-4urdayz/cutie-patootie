@@ -1,37 +1,60 @@
+const pathJoin = require("../shared/pathJoin");
+const imageManager = require(pathJoin.getModulePath() + '/imageManager');
+const contextMenu = require(pathJoin.getModulePath() + '/contextMenu');
+
 const { ipcRenderer } = require("electron");
 
-console.log("renderer.js 파일 실행 시작!"); // 이 로그가 나와야 합니다.
+console.log("[Renderer] renderer.js 파일 실행 시작.");
 
-window.addEventListener("DOMContentLoaded", () => {
-    const img = document.getElementById("mainImage"); 
+let initialWindowWidth = 0;
+let initialWindowHeight = 0;
 
-    if (!img) {
-        console.error("[Renderer] ID 'mainImage'를 가진 요소를 찾을 수 없습니다.");
-        return;
+// 메인 프로세스로부터 초기 창 크기 수신
+ipcRenderer.on('initial-window-size', (event, { width, height }) =>
+{
+    initialWindowWidth = width;
+    initialWindowHeight = height;
+    console.log(`[Renderer] 메인 프로세스로부터 초기 창 크기 수신: ${initialWindowWidth}x${initialWindowHeight}`);
+
+    // 만약 DOMContentLoaded가 이미 발생했다면 여기서 imageManager 시작
+    if (document.readyState === 'complete' || document.readyState === 'interactive')
+    {
+        startImageManagerIfReady();
     }
-
-    // ✨ renderer.js에서 이미지 src를 설정합니다. ✨
-    const imageName = "default.png";
-    const imagePath = `asset/${imageName}`; // 경로가 올바른지 확인 (index.html 기준)
-    img.src = imagePath;
-    console.log(`[Renderer] 이미지 src 설정: ${imagePath}`);
-
-
-    img.onload = () => {
-        const width = img.naturalWidth;
-        const height = img.naturalHeight;
-
-        console.log(`[Renderer] 이미지 로드 완료 및 크기: ${width}x${height}`);
-        ipcRenderer.send("resize-window", { width, height });
-
-        // 이미지 로드 및 창 크기 조절 후, 창 상태 갱신을 요청합니다.
-        setTimeout(() => {
-            ipcRenderer.send('refresh-window-state');
-            console.log("[Renderer] 메인 프로세스에 창 상태 갱신 요청을 보냈습니다.");
-        }, 100); // 필요에 따라 지연 시간 조절
-    };
-
-    img.onerror = () => {
-        console.error("[Renderer] 이미지 로드 실패!");
-    };
 });
+
+window.addEventListener("DOMContentLoaded", () =>
+{
+    // DOM이 준비되었을 때 imageManager를 시작할 준비가 되었음을 알림
+    startImageManagerIfReady();
+});
+
+function startImageManagerIfReady()
+{
+    // 초기 창 크기 정보가 있고 DOM이 로드되었을 때만 시작
+    if (initialWindowWidth > 0 && initialWindowHeight > 0 &&
+        (document.readyState === 'complete' || document.readyState === 'interactive'))
+    {
+
+        const currentImage = document.getElementById("currentImage");
+        const nextImage = document.getElementById("nextImage");
+
+        if (!currentImage || !nextImage)
+        {
+            console.error("[Renderer] 'currentImage' 또는 'nextImage' 중 하나 이상의 이미지 요소를 찾을 수 없습니다. index.html의 ID를 확인해 주세요.");
+            return;
+        }
+
+        // imageManager.startAutoImageChange에 고정된 창 크기 전달
+        imageManager.startAutoImageChange(currentImage, nextImage, initialWindowWidth, initialWindowHeight, 5000, 300000);
+
+        contextMenu.setupContextMenu(currentImage, () =>
+        {
+            imageManager.changeImageManually();
+        });
+
+        // 이 함수는 한 번만 실행되어야 하므로, 더 이상 호출되지 않도록 플래그를 설정하거나
+        // 로직 자체를 이미지를 시작하는 곳으로 옮길 수 있습니다.
+        // 현재는 첫 호출 이후에 다시 호출되어도 문제가 없도록 설계되어 있습니다.
+    }
+}

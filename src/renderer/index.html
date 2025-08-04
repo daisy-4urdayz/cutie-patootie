@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="ko">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -9,16 +10,12 @@
 </head>
 
 <body>
-    <div class="mainPage">
-        <div class="overlay"></div>
-        <img id="mainImage" class="dragArea" src="" alt="Default image">
+    <div id="mainPage" class="dragArea">
+        <img id="currentImage" src="" class="bgImageActive" alt="First: Current image">
+        <img id="nextImage" src="" class="bgImage" alt="Second: Next image">
     </div>
 
-    <script src="renderer.js">
-        // console.log("[HTML] 이미지 로딩 완료");
-        // const imageName = "default.png";
-        // const imagePath = `asset/${imageName}`;
-        // document.getElementById("mainImage").src = imagePath;
-    </script>
+    <script src="renderer.js"></script>
 </body>
+
 </html>

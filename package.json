@@ -1,4 +1,55 @@
 {
+<<<<<<< HEAD
+    "name": "cutie-patootie",
+    "version": "1.0.0",
+    "description": "Desktop widget for my cutie patooties",
+    "license": "ISC",
+    "author": "daisy",
+    "main": "src/main/main.js",
+    "scripts":
+    {
+        "start": "electron .",
+        "build:win": "electron-builder --win dir",
+        "clean": "rimraf dist node_modules/.cache"
+    },
+    "devDependencies":
+    {
+        "electron": "^37.2.5",
+        "electron-builder": "^26.0.12"
+    },
+    "dependencies":
+    {
+        "@emnapi/runtime": "^1.4.5",
+        "image-size": "^2.0.2",
+        "sharp": "^0.34.3"
+    },
+    "optionalDependencies":
+    {
+        "@img/sharp-win32-x64": "^0.34.3"
+    },
+    "build":
+    {
+        "appId": "com.daisy-4urdayz.cutie-patootie",
+        "productName": "My cutie patooties",
+        "directories":
+        {
+            "output": "dist"
+        },
+        "files": [
+            "**/*"
+        ],
+        "asar": false,
+        "win":
+        {
+            "target": [
+            {
+                "target": "dir",
+                "arch": ["x64"]
+            }],
+            "icon": "src/icon.ico"
+        }
+    }
+=======
   "name": "clippy",
   "version": "1.0.0",
   "description": "",
@@ -17,4 +68,5 @@
     "image-size": "^2.0.2",
     "sharp": "^0.34.3"
   }
+>>>>>>> c0e0b04d6da4d466e90df4538f389fac72ea49b2
 }
