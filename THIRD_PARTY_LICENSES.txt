@@ -1,0 +1,49 @@
+# Third-Party Licenses for My cutie patooties
+# Generated on 2025-08-05
+
+This software uses open-source components.  
+Each component is copyrighted by its respective author(s) and licensed as follows:
+
+-------------------------------------------------------------------------------
+License Summary
+- MIT: 238
+- ISC: 57
+- Apache-2.0: 9
+- BSD-2-Clause: 7
+- BSD-3-Clause: 5
+- BlueOak-1.0.0: 3
+- Apache-2.0 AND LGPL-3.0-or-later: 1
+- Python-2.0: 1
+- WTFPL family: 3
+- 0BSD: 1
+- MIT OR CC0-1.0: 1
+
+-------------------------------------------------------------------------------
+Full third-party license list is available in the node_modules folder.  
+For each library, please refer to the corresponding LICENSE file within:
+
+- `node_modules/<package-name>/LICENSE`
+- or `node_modules/<package-name>/LICENSE.md`
+
+-------------------------------------------------------------------------------
+Notable dependencies:
+
+1. Electron  
+   License: MIT  
+   Copyright (c) 2013-2025 GitHub Inc.  
+   https://github.com/electron/electron
+
+2. Express  
+   License: MIT  
+   Copyright JS Foundation and other contributors  
+   https://github.com/expressjs/express
+
+3. Axios  
+   License: MIT  
+   Copyright Matt Zabriskie  
+   https://github.com/axios/axios
+
+-------------------------------------------------------------------------------
+This notice is provided to comply with the license terms of the included
+open-source projects.  
+No warranty is provided for third-party components.

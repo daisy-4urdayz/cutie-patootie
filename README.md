@@ -79,3 +79,6 @@ dist/win-unpacked/
 
 - 제작자: daisy  
 - 문의: [GitHub Issues](https://github.com/daisy-4urdayz/cutie-patootie)
+
+## 라이선스
+이 프로젝트는 MIT 라이선스 하에 배포됩니다. 자세한 내용은 LICENSE 파일을 참고하세요.
