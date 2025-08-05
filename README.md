@@ -1,6 +1,6 @@
 # My cutie patooties 💕
 
-- [다운로드 링크](https://github.com/daisy-4urdayz/cutie-patootie/releases/latest): https://github.com/daisy-4urdayz/cutie-patootie/releases/tag/v1.0.0
+- [다운로드 링크](https://github.com/daisy-4urdayz/cutie-patootie/releases/latest): https://github.com/daisy-4urdayz/cutie-patootie/releases
 - `My cutie patooties`는 Electron을 사용한 데스크탑 위젯 애플리케이션입니다.
 - 좋아하는 아이의 사진을 위젯처럼 모니터 화면에 띄워 놓고 싶었습니다.
 - 크로미움 기반 브라우저를 사용하기 때문에 메모리를 좀 잡아먹을 수 있습니다. 게다가 GPU 사용을 강제로 해제해서 CPU에서 돌아갑니다.
