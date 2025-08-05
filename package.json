@@ -1,7 +1,6 @@
 {
-<<<<<<< HEAD
     "name": "cutie-patootie",
-    "version": "1.0.0",
+    "version": "1.0.1",
     "description": "Desktop widget for my cutie patooties",
     "license": "ISC",
     "author": "daisy",
@@ -43,30 +42,10 @@
         {
             "target": [
             {
-                "target": "dir",
+                "target": [ "dir", "zip" ],
                 "arch": ["x64"]
             }],
             "icon": "src/icon.ico"
         }
     }
-=======
-  "name": "clippy",
-  "version": "1.0.0",
-  "description": "",
-  "license": "ISC",
-  "author": "",
-  "type": "commonjs",
-  "main": "src/main/main.js",
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "electron ."
-  },
-  "devDependencies": {
-    "electron": "^37.2.5"
-  },
-  "dependencies": {
-    "image-size": "^2.0.2",
-    "sharp": "^0.34.3"
-  }
->>>>>>> c0e0b04d6da4d466e90df4538f389fac72ea49b2
 }
