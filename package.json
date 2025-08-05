@@ -42,7 +42,7 @@
         {
             "target": [
             {
-                "target": [ "dir", "zip" ],
+                "target": "dir",
                 "arch": ["x64"]
             }],
             "icon": "src/icon.ico"
