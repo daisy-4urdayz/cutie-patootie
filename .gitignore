@@ -27,3 +27,4 @@ token.txt
 
 # --- 배포용 ---
 dist/
+dist.zip
